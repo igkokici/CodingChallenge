@@ -7,7 +7,7 @@ export interface IArticle {
     shortDescription: string;
     readingTime: number;
     image: ImageSourcePropType
-  }
+}
   
 
 export const Article = ({image, readingTime, shortDescription, title}: IArticle) => {

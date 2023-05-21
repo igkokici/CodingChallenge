@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchTopicsAsync } from '../store/reducers/topicSlice';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Topic } from '../components/topics';
 
@@ -10,24 +12,12 @@ interface IResponseTopics {
 
 const OverviewScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
-  // const [data, setData] = useState(Array<IResponseTopics>);
+  const dispatch = useDispatch();
+  const { topics, loading, error } = useSelector((state : any) => state.topics);
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
-
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await fetch('http://127.0.0.1:3001/topics')
-  //     const jsonData = await response.json();
-  //     setData(jsonData);
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
-
-  const data : Array<IResponseTopics> = [{"id":"mobility","name":"Alltagsmobilität"},{"id":"lifestyle","name":"Lifestyle"},{"id":"travel","name":"Reisen"},{"id":"living","name":"Wohnen"}]
-
+  useEffect(() => {
+    dispatch(fetchTopicsAsync());
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
@@ -37,14 +27,15 @@ const OverviewScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       </View>
 
       <View style={styles.secondTestContainer}>
-        {/* <View style={styles.transform}/> */}
           <Text style={styles.topicsTitle}>
             Deine wichtigsten Themen
           </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.categoryList}>
-            {data.map(topic => (
-              <Topic key={topic.id} id={topic.id} name={topic.name} onPress={() => navigation.navigate(topic.id === 'living' ? 'Wohnen' : topic.id)}/>
+            {loading && <Text>Loading topics...</Text>}
+            {error && <Text>Error: {error}</Text>}
+            {topics.map((topic: IResponseTopics) => (
+              <Topic key={topic.id} id={topic.id} name={topic.name} onPress={() => navigation.navigate(topic.id === 'living' ? 'Wohnen' : topic.id, {topicId: topic.id})}/>
             ))}
           </View>
         </ScrollView>

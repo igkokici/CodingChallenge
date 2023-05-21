@@ -1,47 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { Article, IArticle } from '../components/article';
+import { fetchTopicDetailsAsync } from '../store/reducers/topicDetails';
 
 interface IITem extends IArticle {
   id: string;
 }
 
 interface ICategoryScreenProps {
-  navigation: any;
+  route: any;
 }
 
-const CategoryScreen: React.FC<ICategoryScreenProps> = ({ navigation }) => {
+const CategoryScreen: React.FC<ICategoryScreenProps> = ({ route }) => {
 
-  const articles: IITem[] = [
-    {
-      id: "1",
-      title: "CO2 impact from heating",
-      shortDescription: "Description of this item",
-      readingTime: 3,
-      image: require('../../assets/co2.png')
-    },
-    {
-      id: "2",
-      title: "Energy consumption in the household",
-      shortDescription: "Descriptive text about this item Descriptive text about",
-      readingTime: 6,
-      image: require('../../assets/energy.png')
-    },
-    {
-      id: "3",
-      title: "Possibility of reduction",
-      shortDescription: "Description text about this item",
-      readingTime: 4,
-      image: require('../../assets/reduction.png')
-    },
-    {
-      id: "4",
-      title: "Possibility of funding",
-      shortDescription: "Description text about this item Description text about",
-      readingTime: 8,
-      image: require('../../assets/wood.png')
-    }
-  ];
+  const topicId = route.params.topicId
+
+  const dispatch = useDispatch();
+  const { topic, loading, error } = useSelector(
+    (state: any) => state.topic
+  );
+
+  useEffect(() => {
+    dispatch(fetchTopicDetailsAsync(topicId));
+  }, [dispatch, topicId]);
+
+  if (!topic) {
+    return <Text>Topic details not found</Text>;
+  }
 
   const renderItem = ({ item }: { item: IITem }) => (
     <Article 
@@ -60,9 +46,11 @@ const CategoryScreen: React.FC<ICategoryScreenProps> = ({ navigation }) => {
       </View>
       <View style={styles.articleView}>
         <Text style={styles.titleArticle}>Übersicht</Text>
+        {loading && <Text>Loading topic details...</Text>}
+        {error && <Text>Error: {error}</Text>}
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={articles}
+          data={topic.articles}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
         />
